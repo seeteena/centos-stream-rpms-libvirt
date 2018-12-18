@@ -1836,8 +1836,9 @@ qemuSetUnprivSGIO(virDomainDeviceDef *dev)
     virDomainDiskDef *disk = NULL;
     virDomainHostdevDef *hostdev = NULL;
     g_autofree char *sysfs_path = NULL;
+    g_autofree char *hostdev_path = NULL;
     const char *path = NULL;
-    int val = -1;
+    int val = 0;
 
     /* "sgio" is only valid for block disk; cdrom
      * and floopy disk can have empty source.
@@ -1853,17 +1854,14 @@ qemuSetUnprivSGIO(virDomainDeviceDef *dev)
     } else if (dev->type == VIR_DOMAIN_DEVICE_HOSTDEV) {
         hostdev = dev->data.hostdev;
 
-        if (!qemuIsSharedHostdev(hostdev))
+        if (hostdev->source.subsys.u.scsi.protocol ==
+            VIR_DOMAIN_HOSTDEV_SCSI_PROTOCOL_TYPE_ISCSI)
             return 0;
 
-        if (hostdev->source.subsys.u.scsi.sgio) {
-            virReportError(VIR_ERR_INTERNAL_ERROR, "%s",
-                           _("'sgio' is not supported for SCSI "
-                             "generic device yet "));
+        if (!(hostdev_path = qemuGetHostdevPath(hostdev)))
             return -1;
-        }
 
-        return 0;
+        path = hostdev_path;
     } else {
         return 0;
     }
@@ -1872,7 +1870,16 @@ qemuSetUnprivSGIO(virDomainDeviceDef *dev)
         return -1;
 
     /* By default, filter the SG_IO commands, i.e. set unpriv_sgio to 0.  */
-    val = (disk->sgio == VIR_DOMAIN_DEVICE_SGIO_UNFILTERED);
+    if (dev->type == VIR_DOMAIN_DEVICE_DISK) {
+        if (disk->sgio == VIR_DOMAIN_DEVICE_SGIO_UNFILTERED)
+            val = 1;
+    } else {
+        /* Only settable if <shareable/> was present for hostdev */
+        if (qemuIsSharedHostdev(hostdev) &&
+            hostdev->source.subsys.u.scsi.sgio ==
+            VIR_DOMAIN_DEVICE_SGIO_UNFILTERED)
+            val = 1;
+    }
 
     /* Do not do anything if unpriv_sgio is not supported by the kernel and the
      * whitelist is enabled.  But if requesting unfiltered access, always call
