@@ -1743,13 +1743,29 @@ qemuSharedHostdevAddRemoveInternal(virQEMUDriver *driver,
 {
     g_autofree char *dev_path = NULL;
     g_autofree char *key = NULL;
+    virDomainHostdevSubsysSCSI *scsisrc = &hostdev->source.subsys.u.scsi;
+    virDomainHostdevSubsysSCSIHost *scsihostsrc = &scsisrc->u.host;
     int ret = -1;
 
     if (!qemuIsSharedHostdev(hostdev))
         return 0;
 
-    if (!(dev_path = qemuGetHostdevPath(hostdev)) ||
-        !(key = qemuGetSharedDeviceKey(dev_path)))
+    if (!(dev_path = qemuGetHostdevPath(hostdev)))
+        return -1;
+
+    if ((ret = qemuCheckUnprivSGIO(driver->sharedDevices, dev_path,
+                                   scsisrc->sgio)) < 0) {
+        if (ret == -2) {
+            virReportError(VIR_ERR_OPERATION_INVALID,
+                           _("sgio of shared scsi host device '%s-%u-%u-%llu' "
+                             "conflicts with other active domains"),
+                           scsihostsrc->adapter, scsihostsrc->bus,
+                           scsihostsrc->target, scsihostsrc->unit);
+        }
+        return -1;
+    }
+
+    if (!(key = qemuGetSharedDeviceKey(dev_path)))
         return -1;
 
     qemuDriverLock(driver);
