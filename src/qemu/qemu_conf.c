@@ -1500,7 +1500,7 @@ qemuCheckUnprivSGIO(GHashTable *sharedDevices,
     if (!(virHashLookup(sharedDevices, key)))
         return 0;
 
-    if (virGetDeviceUnprivSGIO(device_path, NULL, &val) < 0)
+    if (virGetDeviceUnprivSGIO(sysfs_path, &val) < 0)
         return -1;
 
     /* Error message on failure needs to be handled in caller
@@ -1852,38 +1852,45 @@ qemuSetUnprivSGIO(virDomainDeviceDef *dev)
     virDomainDiskDef *disk = NULL;
     virDomainHostdevDef *hostdev = NULL;
     g_autofree char *sysfs_path = NULL;
-    g_autofree char *hostdev_path = NULL;
-    const char *path = NULL;
     int val = 0;
 
     /* "sgio" is only valid for block disk; cdrom
      * and floopy disk can have empty source.
      */
     if (dev->type == VIR_DOMAIN_DEVICE_DISK) {
+        const char *path;
+
         disk = dev->data.disk;
+        path = virDomainDiskGetSource(disk);
 
         if (disk->device != VIR_DOMAIN_DISK_DEVICE_LUN ||
             !virStorageSourceIsBlockLocal(disk->src))
             return 0;
 
-        path = virDomainDiskGetSource(disk);
+        if (!(sysfs_path = virGetUnprivSGIOSysfsPath(path, NULL)))
+            return -1;
+
     } else if (dev->type == VIR_DOMAIN_DEVICE_HOSTDEV) {
+        virDomainHostdevSubsysSCSI *scsisrc;
+        virDomainHostdevSubsysSCSIHost *scsihostsrc;
+
         hostdev = dev->data.hostdev;
+        scsisrc = &hostdev->source.subsys.u.scsi;
+        scsihostsrc = &scsisrc->u.host;
 
         if (hostdev->source.subsys.u.scsi.protocol ==
             VIR_DOMAIN_HOSTDEV_SCSI_PROTOCOL_TYPE_ISCSI)
             return 0;
 
-        if (!(hostdev_path = qemuGetHostdevPath(hostdev)))
+        if (!(sysfs_path = virSCSIDeviceGetUnprivSGIOSysfsPath(NULL,
+                                                               scsihostsrc->adapter,
+                                                               scsihostsrc->bus,
+                                                               scsihostsrc->target,
+                                                               scsihostsrc->unit)))
             return -1;
-
-        path = hostdev_path;
     } else {
         return 0;
     }
-
-    if (!(sysfs_path = virGetUnprivSGIOSysfsPath(path, NULL)))
-        return -1;
 
     /* By default, filter the SG_IO commands, i.e. set unpriv_sgio to 0.  */
     if (dev->type == VIR_DOMAIN_DEVICE_DISK) {
@@ -1902,7 +1909,7 @@ qemuSetUnprivSGIO(virDomainDeviceDef *dev)
      * virSetDeviceUnprivSGIO, to report an error for unsupported unpriv_sgio.
      */
     if ((virFileExists(sysfs_path) || val == 1) &&
-        virSetDeviceUnprivSGIO(path, NULL, val) < 0)
+        virSetDeviceUnprivSGIO(sysfs_path, val) < 0)
         return -1;
 
     return 0;

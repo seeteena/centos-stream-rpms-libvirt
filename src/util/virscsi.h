@@ -40,6 +40,11 @@ char *virSCSIDeviceGetDevName(const char *sysfs_prefix,
                               unsigned int bus,
                               unsigned int target,
                               unsigned long long unit);
+char *virSCSIDeviceGetUnprivSGIOSysfsPath(const char *sysfs_prefix,
+                                          const char *adapter,
+                                          unsigned int bus,
+                                          unsigned int target,
+                                          unsigned long long unit);
 
 virSCSIDevice *virSCSIDeviceNew(const char *sysfs_prefix,
                                   const char *adapter,

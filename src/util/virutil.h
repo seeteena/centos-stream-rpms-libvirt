@@ -120,10 +120,8 @@ int virGetDeviceID(const char *path,
                    int *maj,
                    int *min) G_GNUC_NO_INLINE;
 int virSetDeviceUnprivSGIO(const char *path,
-                           const char *sysfs_dir,
                            int unpriv_sgio);
 int virGetDeviceUnprivSGIO(const char *path,
-                           const char *sysfs_dir,
                            int *unpriv_sgio);
 char *virGetUnprivSGIOSysfsPath(const char *path,
                                 const char *sysfs_dir);

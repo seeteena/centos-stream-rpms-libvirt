@@ -302,6 +302,25 @@ virSCSIDeviceGetDevName(const char *sysfs_prefix,
     }
 }
 
+
+char *
+virSCSIDeviceGetUnprivSGIOSysfsPath(const char *sysfs_prefix,
+                                    const char *adapter,
+                                    unsigned int bus,
+                                    unsigned int target,
+                                    unsigned long long unit)
+{
+    unsigned int adapter_id;
+    const char *prefix = sysfs_prefix ? sysfs_prefix : SYSFS_SCSI_DEVICES;
+
+    if (virSCSIDeviceGetAdapterId(adapter, &adapter_id) < 0)
+        return NULL;
+
+    return g_strdup_printf("%s/%d:%u:%u:%llu/unpriv_sgio",
+                           prefix, adapter_id, bus, target, unit);
+}
+
+
 virSCSIDevice *
 virSCSIDeviceNew(const char *sysfs_prefix,
                  const char *adapter,

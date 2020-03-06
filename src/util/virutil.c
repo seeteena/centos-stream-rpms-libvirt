@@ -1384,18 +1384,13 @@ virGetUnprivSGIOSysfsPath(const char *path,
 
 int
 virSetDeviceUnprivSGIO(const char *path,
-                       const char *sysfs_dir,
                        int unpriv_sgio)
 {
-    char *sysfs_path = NULL;
     char *val = NULL;
     int ret = -1;
     int rc;
 
-    if (!(sysfs_path = virGetUnprivSGIOSysfsPath(path, sysfs_dir)))
-        return -1;
-
-    if (!virFileExists(sysfs_path)) {
+    if (!virFileExists(path)) {
         virReportError(VIR_ERR_OPERATION_INVALID, "%s",
                        _("unpriv_sgio is not supported by this kernel"));
         goto cleanup;
@@ -1403,38 +1398,32 @@ virSetDeviceUnprivSGIO(const char *path,
 
     val = g_strdup_printf("%d", unpriv_sgio);
 
-    if ((rc = virFileWriteStr(sysfs_path, val, 0)) < 0) {
-        virReportSystemError(-rc, _("failed to set %s"), sysfs_path);
+    if ((rc = virFileWriteStr(path, val, 0)) < 0) {
+        virReportSystemError(-rc, _("failed to set %s"), path);
         goto cleanup;
     }
 
     ret = 0;
  cleanup:
-    VIR_FREE(sysfs_path);
     VIR_FREE(val);
     return ret;
 }
 
 int
 virGetDeviceUnprivSGIO(const char *path,
-                       const char *sysfs_dir,
                        int *unpriv_sgio)
 {
-    char *sysfs_path = NULL;
     char *buf = NULL;
     char *tmp = NULL;
     int ret = -1;
 
-    if (!(sysfs_path = virGetUnprivSGIOSysfsPath(path, sysfs_dir)))
-        return -1;
-
-    if (!virFileExists(sysfs_path)) {
+    if (!virFileExists(path)) {
         virReportError(VIR_ERR_OPERATION_INVALID, "%s",
                        _("unpriv_sgio is not supported by this kernel"));
         goto cleanup;
     }
 
-    if (virFileReadAll(sysfs_path, 1024, &buf) < 0)
+    if (virFileReadAll(path, 1024, &buf) < 0)
         goto cleanup;
 
     if ((tmp = strchr(buf, '\n')))
@@ -1442,13 +1431,12 @@ virGetDeviceUnprivSGIO(const char *path,
 
     if (virStrToLong_i(buf, NULL, 10, unpriv_sgio) < 0) {
         virReportError(VIR_ERR_INTERNAL_ERROR,
-                       _("failed to parse value of %s"), sysfs_path);
+                       _("failed to parse value of %s"), path);
         goto cleanup;
     }
 
     ret = 0;
  cleanup:
-    VIR_FREE(sysfs_path);
     VIR_FREE(buf);
     return ret;
 }
