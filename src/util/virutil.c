@@ -1340,9 +1340,6 @@ virGetDeviceID(const char *path, int *maj, int *min)
     if (stat(path, &sb) < 0)
         return -errno;
 
-    if (!S_ISBLK(sb.st_mode))
-        return -EINVAL;
-
     if (maj)
         *maj = major(sb.st_rdev);
     if (min)
