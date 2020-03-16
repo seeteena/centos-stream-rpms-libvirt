@@ -630,6 +630,7 @@ VIR_ENUM_IMPL(virQEMUCaps,
               "compat-deprecated",
               "acpi-index",
               "input-linux",
+              "blockdev-reopen.__com.redhat_rhel-av-8_2_0-api",
     );
 
 
@@ -1544,6 +1545,7 @@ static struct virQEMUCapsDevicePropsFlags virQEMUCapsDevicePropsVhostUserFS[] = 
 
 /* see documentation for virQEMUQAPISchemaPathGet for the query format */
 static struct virQEMUCapsStringFlags virQEMUCapsQMPSchemaQueries[] = {
+    { "x-blockdev-reopen/$__com.redhat_rhel-av-8_2_0-api", QEMU_CAPS_BLOCKDEV_REOPEN_COM_REDHAT_AV_8_2_0_API },
     { "blockdev-add/arg-type/options/+gluster/debug-level", QEMU_CAPS_GLUSTER_DEBUG_LEVEL},
     { "blockdev-add/arg-type/+gluster/debug", QEMU_CAPS_GLUSTER_DEBUG_LEVEL},
     { "blockdev-add/arg-type/+vxhs", QEMU_CAPS_VXHS},
@@ -5191,6 +5193,15 @@ virQEMUCapsInitProcessCaps(virQEMUCaps *qemuCaps)
         qemuCaps->arch == VIR_ARCH_M68K ||
         qemuCaps->arch == VIR_ARCH_MIPS)
         virQEMUCapsSet(qemuCaps, QEMU_CAPS_SCSI_NCR53C90);
+
+    /* RHEL-only:
+     * - if upstream blockdev-reopen is enabled, clear the downstream flag
+     * - if the downstream flag is present but not the upstream, assert the upstream flag too
+     */
+    if (virQEMUCapsGet(qemuCaps, QEMU_CAPS_BLOCKDEV_REOPEN))
+        virQEMUCapsClear(qemuCaps, QEMU_CAPS_BLOCKDEV_REOPEN_COM_REDHAT_AV_8_2_0_API);
+    if (virQEMUCapsGet(qemuCaps, QEMU_CAPS_BLOCKDEV_REOPEN_COM_REDHAT_AV_8_2_0_API))
+        virQEMUCapsSet(qemuCaps, QEMU_CAPS_BLOCKDEV_REOPEN);
 
     virQEMUCapsInitProcessCapsInterlock(qemuCaps);
 }
