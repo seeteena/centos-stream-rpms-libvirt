@@ -3305,6 +3305,7 @@ qemuBlockReopenFormat(virDomainObj *vm,
     qemuDomainObjPrivate *priv = vm->privateData;
     virQEMUDriver *driver = priv->driver;
     g_autoptr(virJSONValue) reopenprops = NULL;
+    bool downstream = virQEMUCapsGet(priv->qemuCaps, QEMU_CAPS_BLOCKDEV_REOPEN_COM_REDHAT_AV_8_2_0_API);
     int rc;
 
     /* If we are lacking the object here, qemu might have opened an image with
@@ -3321,7 +3322,7 @@ qemuBlockReopenFormat(virDomainObj *vm,
     if (qemuDomainObjEnterMonitorAsync(driver, vm, asyncJob) < 0)
         return -1;
 
-    rc = qemuMonitorBlockdevReopen(priv->mon, &reopenprops);
+    rc = qemuMonitorBlockdevReopen(priv->mon, &reopenprops, downstream);
 
     if (qemuDomainObjExitMonitor(driver, vm) < 0 || rc < 0)
         return -1;

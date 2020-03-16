@@ -8836,13 +8836,19 @@ qemuMonitorJSONBlockdevAdd(qemuMonitor *mon,
 
 int
 qemuMonitorJSONBlockdevReopen(qemuMonitor *mon,
-                              virJSONValue **props)
+                              virJSONValue **props,
+                              bool downstream)
 {
     g_autoptr(virJSONValue) cmd = NULL;
     g_autoptr(virJSONValue) reply = NULL;
 
-    if (!(cmd = qemuMonitorJSONMakeCommandInternal("blockdev-reopen", props)))
-        return -1;
+    if (downstream) {
+        if (!(cmd = qemuMonitorJSONMakeCommandInternal("x-blockdev-reopen", props)))
+            return -1;
+    } else {
+        if (!(cmd = qemuMonitorJSONMakeCommandInternal("blockdev-reopen", props)))
+            return -1;
+    }
 
     if (qemuMonitorJSONCommand(mon, cmd, &reply) < 0)
         return -1;
