@@ -1,0 +1,16 @@
+jobs:
+- job: copr_build
+  metadata:
+    targets:
+    - centos-stream-8-x86_64
+  trigger: pull_request
+- job: tests
+  metadata:
+    targets:
+    - centos-stream-8-x86_64
+  trigger: pull_request
+sources:
+- path: libvirt-6.0.0.tar.xz
+  url: https://git.centos.org/sources/libvirt/c8s-stream-rhel/9939a559e652d44b27e3404a26bcabe58988e4b4
+specfile_path: SPECS/libvirt.spec
+upstream_ref: c8s-stream-rhel-source-git
