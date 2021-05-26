@@ -1,0 +1,5 @@
+emptyrpm:
+  expected_empty:
+    - libvirt
+    - libvirt-daemon-driver-storage
+    - libvirt-daemon-kvm
