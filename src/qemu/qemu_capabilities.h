@@ -618,6 +618,7 @@ typedef enum { /* virQEMUCapsFlags grouping marker for syntax-check */
     QEMU_CAPS_QUERY_DISPLAY_OPTIONS, /* 'query-display-options' qmp command present */
     QEMU_CAPS_S390_PV_GUEST, /* -object s390-pv-guest,... */
     QEMU_CAPS_SET_ACTION, /* 'set-action' QMP command */
+    QEMU_CAPS_BLOCKDEV_REOPEN_COM_REDHAT_AV_8_2_0_API, /* downstream support for blockdev reopen in rhel-av-8.2.0 */
 
     QEMU_CAPS_LAST /* this must always be the last item */
 } virQEMUCapsFlags;

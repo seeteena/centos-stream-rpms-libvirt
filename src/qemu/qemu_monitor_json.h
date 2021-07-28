@@ -598,7 +598,8 @@ int qemuMonitorJSONBlockdevAdd(qemuMonitor *mon,
     ATTRIBUTE_NONNULL(1) ATTRIBUTE_NONNULL(2);
 
 int qemuMonitorJSONBlockdevReopen(qemuMonitor *mon,
-                                  virJSONValue **props)
+                                  virJSONValue **props,
+                                  bool downstream)
     ATTRIBUTE_NONNULL(1) ATTRIBUTE_NONNULL(2);
 
 int qemuMonitorJSONBlockdevDel(qemuMonitor *mon,

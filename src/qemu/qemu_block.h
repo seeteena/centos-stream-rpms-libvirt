@@ -268,7 +268,8 @@ qemuBlockBitmapsHandleCommitFinish(virStorageSource *topsrc,
 /* only for use in qemumonitorjsontest */
 int
 qemuBlockReopenFormatMon(qemuMonitor *mon,
-                         virStorageSource *src);
+                         virStorageSource *src,
+                         bool downstream);
 
 int
 qemuBlockReopenReadWrite(virDomainObj *vm,
