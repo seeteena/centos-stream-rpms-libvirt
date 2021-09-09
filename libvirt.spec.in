@@ -182,7 +182,7 @@
 %endif
 
 %define with_modular_daemons 0
-%if 0%{?fedora} >= 35 || 0%{?rhel} >= 9
+%if 0%{?fedora} >= 35
     %define with_modular_daemons 1
 %endif
 
