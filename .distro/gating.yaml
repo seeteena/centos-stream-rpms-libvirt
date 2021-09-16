@@ -3,6 +3,7 @@
 product_versions:
   - rhel-9
 decision_context: osci_compose_gate
+subject_type: brew-build
 rules:
   - !PassingTestCaseRule {test_case_name: libvirt-ci.libvirt.brew-build.gating.x86_64.tier1.functional}
   - !PassingTestCaseRule {test_case_name: libvirt-ci.libvirt-python.brew-build.gating.x86_64.tier1.functional}
