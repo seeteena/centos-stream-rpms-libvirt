@@ -10543,9 +10543,6 @@ qemuBuildCommandLine(virQEMUDriver *driver,
         qemuBuildNumaCommandLine(cfg, def, cmd, priv) < 0)
         return NULL;
 
-    if (qemuBuildMemoryDeviceCommandLine(cmd, cfg, def, priv) < 0)
-        return NULL;
-
     virUUIDFormat(def->uuid, uuid);
     virCommandAddArgList(cmd, "-uuid", uuid, NULL);
 
@@ -10593,6 +10590,9 @@ qemuBuildCommandLine(virQEMUDriver *driver,
         return NULL;
 
     if (qemuBuildControllersCommandLine(cmd, def, qemuCaps) < 0)
+        return NULL;
+
+    if (qemuBuildMemoryDeviceCommandLine(cmd, cfg, def, priv) < 0)
         return NULL;
 
     if (qemuBuildHubCommandLine(cmd, def, qemuCaps) < 0)
