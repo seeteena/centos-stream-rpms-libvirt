@@ -3259,7 +3259,7 @@ qemuMigrationDstPrepareActive(virQEMUDriver *driver,
     }
 
     if (qemuMigrationParamsApply(driver, vm, VIR_ASYNC_JOB_MIGRATION_IN,
-                                 migParams) < 0)
+                                 migParams, flags) < 0)
         goto error;
 
     if (mig->nbd &&
@@ -4847,7 +4847,7 @@ qemuMigrationSrcRun(virQEMUDriver *driver,
         goto error;
 
     if (qemuMigrationParamsApply(driver, vm, VIR_ASYNC_JOB_MIGRATION_OUT,
-                                 migParams) < 0)
+                                 migParams, flags) < 0)
         goto error;
 
     if (flags & VIR_MIGRATE_ZEROCOPY) {
@@ -6941,7 +6941,7 @@ qemuMigrationSrcToFile(virQEMUDriver *driver, virDomainObj *vm,
                                       QEMU_DOMAIN_MIG_BANDWIDTH_MAX * 1024 * 1024) < 0)
             return -1;
 
-        if (qemuMigrationParamsApply(driver, vm, asyncJob, migParams) < 0)
+        if (qemuMigrationParamsApply(driver, vm, asyncJob, migParams, 0) < 0)
             return -1;
 
         priv->migMaxBandwidth = QEMU_DOMAIN_MIG_BANDWIDTH_MAX;
@@ -7037,7 +7037,7 @@ qemuMigrationSrcToFile(virQEMUDriver *driver, virDomainObj *vm,
                                           QEMU_MIGRATION_PARAM_MAX_BANDWIDTH,
                                           saveMigBandwidth * 1024 * 1024) == 0)
                 ignore_value(qemuMigrationParamsApply(driver, vm, asyncJob,
-                                                      migParams));
+                                                      migParams, 0));
         } else {
             if (qemuDomainObjEnterMonitorAsync(driver, vm, asyncJob) == 0) {
                 qemuMonitorSetMigrationSpeed(priv->mon, saveMigBandwidth);
