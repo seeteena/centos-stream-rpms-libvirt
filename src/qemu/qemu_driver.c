@@ -13172,10 +13172,8 @@ qemuDomainMigrateGetCompressionCache(virDomainPtr dom,
 {
     virQEMUDriver *driver = dom->conn->privateData;
     virDomainObj *vm;
-    qemuDomainObjPrivate *priv;
     g_autoptr(qemuMigrationParams) migParams = NULL;
     int ret = -1;
-    int rc;
 
     virCheckFlags(0, -1);
 
@@ -13191,8 +13189,6 @@ qemuDomainMigrateGetCompressionCache(virDomainPtr dom,
     if (virDomainObjCheckActive(vm) < 0)
         goto endjob;
 
-    priv = vm->privateData;
-
     if (!qemuMigrationCapsGet(vm, QEMU_MIGRATION_CAP_XBZRLE)) {
         virReportError(VIR_ERR_OPERATION_UNSUPPORTED, "%s",
                        _("Compressed migration is not supported by "
@@ -13200,22 +13196,14 @@ qemuDomainMigrateGetCompressionCache(virDomainPtr dom,
         goto endjob;
     }
 
-    if (virQEMUCapsGet(priv->qemuCaps, QEMU_CAPS_MIGRATION_PARAM_XBZRLE_CACHE_SIZE)) {
-        if (qemuMigrationParamsFetch(driver, vm, VIR_ASYNC_JOB_NONE,
-                                     &migParams) < 0)
-            goto endjob;
+    if (qemuMigrationParamsFetch(driver, vm, VIR_ASYNC_JOB_NONE,
+                                 &migParams) < 0)
+        goto endjob;
 
-        if (qemuMigrationParamsGetULL(migParams,
-                                      QEMU_MIGRATION_PARAM_XBZRLE_CACHE_SIZE,
-                                      cacheSize) < 0)
-            goto endjob;
-    } else {
-        qemuDomainObjEnterMonitor(driver, vm);
-        rc = qemuMonitorGetMigrationCacheSize(priv->mon, cacheSize);
-        qemuDomainObjExitMonitor(vm);
-        if (rc < 0)
-            goto endjob;
-    }
+    if (qemuMigrationParamsGetULL(migParams,
+                                  QEMU_MIGRATION_PARAM_XBZRLE_CACHE_SIZE,
+                                  cacheSize) < 0)
+        goto endjob;
 
     ret = 0;
 
@@ -13234,10 +13222,8 @@ qemuDomainMigrateSetCompressionCache(virDomainPtr dom,
 {
     virQEMUDriver *driver = dom->conn->privateData;
     virDomainObj *vm;
-    qemuDomainObjPrivate *priv;
     g_autoptr(qemuMigrationParams) migParams = NULL;
     int ret = -1;
-    int rc;
 
     virCheckFlags(0, -1);
 
@@ -13253,8 +13239,6 @@ qemuDomainMigrateSetCompressionCache(virDomainPtr dom,
     if (virDomainObjCheckActive(vm) < 0)
         goto endjob;
 
-    priv = vm->privateData;
-
     if (!qemuMigrationCapsGet(vm, QEMU_MIGRATION_CAP_XBZRLE)) {
         virReportError(VIR_ERR_OPERATION_UNSUPPORTED, "%s",
                        _("Compressed migration is not supported by "
@@ -13263,25 +13247,17 @@ qemuDomainMigrateSetCompressionCache(virDomainPtr dom,
     }
 
     VIR_DEBUG("Setting compression cache to %llu B", cacheSize);
-    if (virQEMUCapsGet(priv->qemuCaps, QEMU_CAPS_MIGRATION_PARAM_XBZRLE_CACHE_SIZE)) {
-        if (!(migParams = qemuMigrationParamsNew()))
-            goto endjob;
+    if (!(migParams = qemuMigrationParamsNew()))
+        goto endjob;
 
-        if (qemuMigrationParamsSetULL(migParams,
-                                      QEMU_MIGRATION_PARAM_XBZRLE_CACHE_SIZE,
-                                      cacheSize) < 0)
-            goto endjob;
+    if (qemuMigrationParamsSetULL(migParams,
+                                  QEMU_MIGRATION_PARAM_XBZRLE_CACHE_SIZE,
+                                  cacheSize) < 0)
+        goto endjob;
 
-        if (qemuMigrationParamsApply(driver, vm, VIR_ASYNC_JOB_NONE,
-                                     migParams, 0) < 0)
-            goto endjob;
-    } else {
-        qemuDomainObjEnterMonitor(driver, vm);
-        rc = qemuMonitorSetMigrationCacheSize(priv->mon, cacheSize);
-        qemuDomainObjExitMonitor(vm);
-        if (rc < 0)
-            goto endjob;
-    }
+    if (qemuMigrationParamsApply(driver, vm, VIR_ASYNC_JOB_NONE,
+                                 migParams, 0) < 0)
+        goto endjob;
 
     ret = 0;
 
