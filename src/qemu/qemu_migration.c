@@ -1495,6 +1495,14 @@ qemuMigrationSrcIsAllowed(virQEMUDriver *driver,
                                _("cannot migrate domain: %s"), reasons);
                 return false;
             }
+        } else {
+            /* checks here are for anything that doesn't need to be
+             * checked by libvirt if running QEMU that can be queried
+             * about migration blockers.
+             */
+
+            if (!qemuMigrationSrcIsAllowedHostdev(vm->def))
+                return false;
         }
 
         if (remote) {
@@ -1520,9 +1528,6 @@ qemuMigrationSrcIsAllowed(virQEMUDriver *driver,
                            _("domain has active block job"));
             return false;
         }
-
-        if (!qemuMigrationSrcIsAllowedHostdev(vm->def))
-            return false;
 
         if (vm->def->cpu) {
             /* QEMU blocks migration and save with invariant TSC enabled
