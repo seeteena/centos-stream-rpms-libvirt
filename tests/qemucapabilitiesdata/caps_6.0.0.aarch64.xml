@@ -189,6 +189,7 @@
   <flag name='memory-backend-file.prealloc-threads'/>
   <flag name='virtio-iommu-pci'/>
   <flag name='virtio-net.rss'/>
+  <flag name='migration.blocked-reasons'/>
   <version>6000000</version>
   <kvmVersion>0</kvmVersion>
   <microcodeVersion>61700242</microcodeVersion>

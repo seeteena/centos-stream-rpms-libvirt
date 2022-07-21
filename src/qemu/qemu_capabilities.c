@@ -671,6 +671,7 @@ VIR_ENUM_IMPL(virQEMUCaps,
               "chardev.qemu-vdagent", /* QEMU_CAPS_CHARDEV_QEMU_VDAGENT */
               "display-dbus", /* QEMU_CAPS_DISPLAY_DBUS */
               "iothread.thread-pool-max", /* QEMU_CAPS_IOTHREAD_THREAD_POOL_MAX */
+              "migration.blocked-reasons", /* QEMU_CAPS_MIGRATION_BLOCKED_REASONS */
     );
 
 
@@ -1623,6 +1624,7 @@ static struct virQEMUCapsStringFlags virQEMUCapsQMPSchemaQueries[] = {
     { "chardev-add/arg-type/backend/+qemu-vdagent", QEMU_CAPS_CHARDEV_QEMU_VDAGENT },
     { "query-display-options/ret-type/+dbus", QEMU_CAPS_DISPLAY_DBUS },
     { "object-add/arg-type/+iothread/thread-pool-max", QEMU_CAPS_IOTHREAD_THREAD_POOL_MAX },
+    { "query-migrate/ret-type/blocked-reasons", QEMU_CAPS_MIGRATION_BLOCKED_REASONS },
 };
 
 typedef struct _virQEMUCapsObjectTypeProps virQEMUCapsObjectTypeProps;
