@@ -3677,6 +3677,7 @@ qemuProcessRecoverMigration(virQEMUDriver *driver,
 {
     virDomainJobStatus migStatus = VIR_DOMAIN_JOB_STATUS_NONE;
     qemuDomainJobPrivate *jobPriv = job->privateData;
+    qemuDomainObjPrivate *priv = vm->privateData;
     virDomainState state;
     int reason;
     int rc;
@@ -3726,6 +3727,7 @@ qemuProcessRecoverMigration(virQEMUDriver *driver,
 
     qemuMigrationParamsReset(driver, vm, VIR_ASYNC_JOB_NONE,
                              jobPriv->migParams, job->apiFlags);
+    qemuDomainSetMaxMemLock(vm, 0, &priv->preMigrationMemlock);
 
     return 0;
 }
